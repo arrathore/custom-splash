@@ -15,7 +15,7 @@
 
 (defun show-startup-banner ()
   "display a custom banner on startup"
-  (let ((banner-file "~/.emacs.d/ascii/nerv.txt"))
+  (let ((banner-file (expand-file-name "ascii/nerv.txt" user-emacs-directory)))
     (if (file-exists-p banner-file)
 	(let ((banner (with-temp-buffer
 			(insert-file-contents banner-file)
