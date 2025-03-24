@@ -1,6 +1,6 @@
 ;;; package --- Summary
 ;;; Commentary:
-
+;;; Code:
 
 (defun center-text-horizontally (text)
   "center text horizontally in the current window"
@@ -15,36 +15,46 @@
 
 (defun show-startup-banner ()
   "display a custom banner on startup"
-  (let ((banner-file (expand-file-name "ascii/nerv.txt" user-emacs-directory)))
+  (let ((banner-file (expand-file-name "ascii/rei.txt" user-emacs-directory)))
     (if (file-exists-p banner-file)
-	(let ((banner (with-temp-buffer
+	(let* ((banner (with-temp-buffer
 			(insert-file-contents banner-file)
-			(buffer-string)))) ;; read banner file
-
+			(buffer-string))) ;; read banner file
+	      (splash-text
+	       (progn
+		 (with-temp-buffer
+		   (insert-text-button "www.gnu.org"
+				       'action (lambda (_) (browse-url "https://www.gnu.org"))
+				       'help-echo "visit www.gnu.org website"
+				       'follow-link t)
+		   (center-line) (insert "\n")
+		   (insert (concat
+		      (propertize "GNU Emacs" 'face 'bold)
+		      " version "
+		      (format "%d.%d" emacs-major-version emacs-minor-version)))
+		   (center-line) (insert "\n")
+	
+		   (buffer-string))))
+	  (combined-banner (concat banner "\n\n" splash-text))
+	  (centered-banner (center-text-horizontally combined-banner)))
+	      
 	  (switch-to-buffer "*splash*")
 	  (erase-buffer)
-	  (insert (center-text-horizontally banner)) ;; center contents horizontally
-	  
-	  ;; center contents vertically
-	  (goto-char (point-min))
-	  
-	  (let* ((window-height (window-height))
-		 (banner-lines (count-lines (point-min) (point-max)))
-		 (padding (/ (- window-height banner-lines) 2)))
-	    ;; add padding before banner for vertical centering
-	    (dotimes (_ padding)
-	      (insert "\n")))
+	  (insert centered-banner)) ;; center contents horizontally
 
 	  
 	  (setq buffer-read-only t)
 	  (setq mode-line-format nil)
 	  (setq default-directory "~")
-	  )
-      (message "banner file not found!"))))
+	  ))
+      (message "banner file not found!"))
 
 (add-hook 'emacs-startup-hook 'show-startup-banner)
 
 (setq inhibit-splash-screen t)
+
+;; for testing
+ (show-startup-banner)
 
 (provide 'custom-splash)
 ;;; custom-splash.el ends here
